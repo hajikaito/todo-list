@@ -1,6 +1,39 @@
 let tasks = [];
 let currentSort = 'none';
 
+// LocalStorageからデータを読み込む
+function loadTasks() {
+    const savedTasks = localStorage.getItem('todoTasks');
+    const savedSort = localStorage.getItem('todoSort');
+    
+    if (savedTasks) {
+        tasks = JSON.parse(savedTasks);
+    }
+    
+    if (savedSort) {
+        currentSort = savedSort;
+        // ソートボタンのアクティブ状態を復元
+        document.querySelectorAll('.sort-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        const activeBtn = Array.from(document.querySelectorAll('.sort-btn')).find(btn => {
+            if (currentSort === 'none' && btn.textContent.includes('並び替えなし')) return true;
+            if (currentSort === 'deadline' && btn.textContent.includes('期限順')) return true;
+            if (currentSort === 'name' && btn.textContent.includes('名前順')) return true;
+            return false;
+        });
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        }
+    }
+}
+
+// LocalStorageにデータを保存
+function saveTasks() {
+    localStorage.setItem('todoTasks', JSON.stringify(tasks));
+    localStorage.setItem('todoSort', currentSort);
+}
+
 // タスクを追加
 function addTask() {
     const taskInput = document.getElementById('taskInput');
@@ -23,6 +56,7 @@ function addTask() {
     tasks.push(task);
     taskInput.value = '';
     deadlineInput.value = '';
+    saveTasks();
     renderTasks();
 }
 
@@ -38,14 +72,18 @@ function toggleTask(id) {
     const task = tasks.find(t => t.id === id);
     if (task) {
         task.completed = !task.completed;
+        saveTasks();
         renderTasks();
     }
 }
 
 // タスクを削除
 function deleteTask(id) {
-    tasks = tasks.filter(t => t.id !== id);
-    renderTasks();
+    if (confirm('このタスクを削除してもよろしいですか？')) {
+        tasks = tasks.filter(t => t.id !== id);
+        saveTasks();
+        renderTasks();
+    }
 }
 
 // 期限が過ぎているかチェック
@@ -67,6 +105,7 @@ function sortTasks(sortType) {
     });
     event.target.classList.add('active');
 
+    saveTasks();
     renderTasks();
 }
 
@@ -107,7 +146,7 @@ function renderTasks() {
             <div class="item">
                 <div class="checkbox" onclick="toggleTask(${task.id})"></div>
                 <div class="item-content">
-                    <div class="item-text">${task.text}</div>
+                    <div class="item-text">${escapeHtml(task.text)}</div>
                     ${task.deadline ? `<div class="item-deadline ${isOverdue(task.deadline) ? 'overdue' : ''}">${formatDate(task.deadline)}</div>` : ''}
                 </div>
                 <button class="delete-btn" onclick="deleteTask(${task.id})">削除</button>
@@ -123,13 +162,20 @@ function renderTasks() {
             <div class="item">
                 <div class="checkbox checked" onclick="toggleTask(${task.id})"></div>
                 <div class="item-content">
-                    <div class="item-text completed">${task.text}</div>
+                    <div class="item-text completed">${escapeHtml(task.text)}</div>
                     ${task.deadline ? `<div class="item-deadline">${formatDate(task.deadline)}</div>` : ''}
                 </div>
                 <button class="delete-btn" onclick="deleteTask(${task.id})">削除</button>
             </div>
         `).join('');
     }
+}
+
+// HTMLエスケープ（XSS対策）
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // 日付をフォーマット
@@ -141,4 +187,5 @@ function formatDate(dateString) {
 }
 
 // 初期化
+loadTasks();
 renderTasks();
