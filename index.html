@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To Do リスト</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="index.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">To Do リスト</div>
+        </div>
+        
+        <div class="divider"></div>
+
+        <div class="add-task-form">
+            <input type="text" id="taskInput" placeholder="新しいタスクを入力">
+            <input type="date" id="deadlineInput">
+            <button class="add-btn" onclick="addTask()">追加</button>
+        </div>
+
+        <div class="controls">
+            <div class="sort-buttons">
+                <button class="sort-btn active" onclick="sortTasks('none')">並び替えなし</button>
+                <button class="sort-btn" onclick="sortTasks('deadline')">期限順</button>
+                <button class="sort-btn" onclick="sortTasks('name')">名前順</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <div class="section-label section-todo">やること</div>
+                <div class="items" id="todoItems">
+                    <div class="empty-message">タスクを追加してください</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <div class="section-label section-done">やり終えたこと</div>
+                <div class="items" id="doneItems">
+                    <div class="empty-message">完了したタスクはありません</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
